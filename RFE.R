@@ -127,8 +127,6 @@ head(v3data.train)
 names(v3data.train)
 typeof(v3data.train)
 
-rfe.train <- rfe(v3data.train[,1:59],v3dat0a.train[,59], sizes=1:60, rfeControl=control) 
-
 ## task 1 failed - "Can not handle categorical predictors with more than 53 categories."
 ## delete more 
 drops <- c('record_date')
