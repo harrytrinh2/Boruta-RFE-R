@@ -89,7 +89,7 @@ library(doParallel)
 Mycluster = makeCluster(detectCores())
 registerDoParallel(Mycluster)
 set.seed(143)
-control <- rfeControl(functions=rfFuncs, method="repeatedcv", number=10, repeats=3, allowParallel = TRUE)
+control <- rfeControl(functions=rfFuncs, method="repeatedcv", number=10, repeats=1, allowParallel = TRUE)
 
 library(dplyr)
 v3data.train <- dplyr::select(v3data.train, c("record_date",                          
@@ -127,14 +127,14 @@ head(v3data.train)
 names(v3data.train)
 typeof(v3data.train)
 
-rfe.train <- rfe(v3data.train[,1:59],v3data.train[,59], sizes=1:60, rfeControl=control) 
+rfe.train <- rfe(v3data.train[,1:59],v3dat0a.train[,59], sizes=1:60, rfeControl=control) 
 
 ## task 1 failed - "Can not handle categorical predictors with more than 53 categories."
 ## delete more 
 drops <- c('record_date')
 v3data.train =v3data.train[ , !(names(v3data.train) %in% drops)]
 names(v3data.train)
-rfe.train <- rfe(v3data.train[,1:58],v3data.train[,58], sizes=1:59, rfeControl=control) 
+rfe.train <- rfe(v3data.train[,1:58],v3data.train[,59], sizes=1:58, rfeControl=control) 
 
 
 rfe.train
@@ -142,3 +142,4 @@ plot(rfe.train, type=c("g", "o"), cex = 1.0, col = 1:11)
 predictors(rfe.train)
 names(rfe.train)
 rfe.train.optVariables
+
