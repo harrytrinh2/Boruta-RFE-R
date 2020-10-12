@@ -70,7 +70,7 @@ vif_func<-function(in_frame,thresh=10,trace=T,...){
 
 # Check VIF
 
-df.subset <- subset(v3data.train, select= -c(Log_new_cases_per_million, weather_situation, isHoliday, is_weekend, Day_of_Week, continent))
+df.subset <- subset(v3data.train, select= -c(new_cases, weather_situation, isHoliday, is_weekend, Day_of_Week, continent))
 
 vif_result = vif_func(in_frame=df.subset ,thresh=10,trace=T)
 
@@ -93,7 +93,7 @@ names(v3data.train)
 #drops <- c("diabetes_prevalence")
 #v3data.train =v3data.train[ , !(names(v3data.train) %in% drops)]
 
-boruta.train <- Boruta(Log_new_cases_per_million ~. , data = v3data.train, doTrace = 2)
+boruta.train <- Boruta(new_cases ~. , data = v3data.train, doTrace = 2)
 
 print(boruta.train)
 

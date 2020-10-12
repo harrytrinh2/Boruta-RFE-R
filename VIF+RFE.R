@@ -70,7 +70,7 @@ vif_func<-function(in_frame,thresh=10,trace=T,...){
 
 # Check VIF
 
-df.subset <- subset(v3data.train, select= -c(Log_new_cases_per_million, weather_situation, isHoliday, is_weekend, Day_of_Week, continent))
+df.subset <- subset(v3data.train, select= -c(new_cases, weather_situation, isHoliday, is_weekend, Day_of_Week, continent))
 
 vif_result = vif_func(in_frame=df.subset ,thresh=10,trace=T)
 
@@ -121,7 +121,7 @@ v3data.train <- dplyr::select(v3data.train, c("record_date",
                                               "windSpeed",  "Number.of.Tweet",                      
                                               "Sentiments", "isHoliday", 
                                               "Day_of_Week","is_weekend",
-                                              "continent","Log_new_cases_per_million"))
+                                              "continent","new_cases"))
 
 head(v3data.train)
 names(v3data.train)
