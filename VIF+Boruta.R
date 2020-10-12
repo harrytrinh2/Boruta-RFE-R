@@ -76,7 +76,6 @@ vif_result = vif_func(in_frame=df.subset ,thresh=10,trace=T)
 
 # Remove variable with VIF > 10 from the dataset v3data.train
 
-
 names(v3data.train)
 
 drops <- c('CountryCode',"population_density",'cvd_death_rate','gdp_per_capita','diabetes_prevalence','life_expectancy','aged_65_older_sum','urbanPopulation','healthExpenditure','h1_2_action','Days.since.first.case','c8_3_action','h3_2_action')
@@ -90,10 +89,9 @@ library(Boruta)
 set.seed(123)
 names(v3data.train)
 
-v3data.train[-c("diabetes_prevalence")]
-drops <- c("diabetes_prevalence")
-v3data.train =v3data.train[ , !(names(v3data.train) %in% drops)]
-
+#v3data.train[-c("diabetes_prevalence")]
+#drops <- c("diabetes_prevalence")
+#v3data.train =v3data.train[ , !(names(v3data.train) %in% drops)]
 
 boruta.train <- Boruta(Log_new_cases_per_million ~. , data = v3data.train, doTrace = 2)
 
@@ -116,4 +114,5 @@ getSelectedAttributes(final.boruta, withTentative = F)
 boruta.df <- attStats(final.boruta)
 class(boruta.df)
 print(boruta.df)
+
 
