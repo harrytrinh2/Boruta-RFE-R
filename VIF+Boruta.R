@@ -1,4 +1,3 @@
-
 setwd('Documents/GlobalCovid19/Model_tuning_prediction/')
 ## Load train data 
 v3data.train <- read.csv("official_train_test_split/80-20/train_set.csv")
@@ -72,6 +71,8 @@ vif_func<-function(in_frame,thresh=10,trace=T,...){
 
 df.subset <- subset(v3data.train, select= -c(new_cases, weather_situation, isHoliday, is_weekend, Day_of_Week, continent))
 
+names(df.subset)
+
 vif_result = vif_func(in_frame=df.subset ,thresh=10,trace=T)
 
 # Remove variable with VIF > 10 from the dataset v3data.train
@@ -114,5 +115,3 @@ getSelectedAttributes(final.boruta, withTentative = F)
 boruta.df <- attStats(final.boruta)
 class(boruta.df)
 print(boruta.df)
-
-

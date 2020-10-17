@@ -89,7 +89,7 @@ library(doParallel)
 Mycluster = makeCluster(detectCores())
 registerDoParallel(Mycluster)
 set.seed(143)
-control <- rfeControl(functions=rfFuncs, method="repeatedcv", number=10, repeats=1, allowParallel = TRUE)
+control <- rfeControl(functions=rfFuncs, method="repeatedcv", number=10, repeats=0, allowParallel = TRUE)
 
 library(dplyr)
 v3data.train <- dplyr::select(v3data.train, c("record_date",                          
@@ -139,5 +139,6 @@ rfe.train
 plot(rfe.train, type=c("g", "o"), cex = 1.0, col = 1:11)
 predictors(rfe.train)
 names(rfe.train)
-rfe.train.optVariables
+rfe.train$optVariables1
+rfe.train$variables
 
