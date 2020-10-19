@@ -1,7 +1,8 @@
+setwd('Documents/GlobalCovid19/RFE-Boruta-R/')
 
 # Load data 
-v3data.train 
-v3data.test
+v3data.train <- read.csv("R80-20/train_set.csv")
+v3data.test <-  read.csv("R80-20/test_set.csv")
 
 # Load caret package
 library(caret)
@@ -12,33 +13,52 @@ set.seed(1234)
 fitControl <- trainControl(
   method = "repeatedcv",
   number = 10,
-  repeats = 2)
+  repeats = 2, allowParallel = TRUE)
+
+
+## Parallel Training
+library(doParallel)
+cluster <- makeCluster(detectCores(logical = TRUE)) # leave one CPU spare...
+registerDoParallel(cluster)
+clusterEvalQ(cluster, {
+  library(caret)
+})
+
 
 # Linear Regression 
 set.seed(1234)
-model_LR<-train(Output ~ . ,data=v3data.train, method='lm', trControl=fitControl,tuneLength=10)
+model_LR<-train(new_cases ~ . ,data=v3data.train, method='lm', trControl=fitControl,tuneLength=10)
 print(model_LR)
 plot(model_LR)
+saveRDS(model_rf, "linear_reg_model.rds")
+
+
 
 # CART Decision Tree
 set.seed(1234)
-model_CART<-train(Output ~ . ,data=v3data.train, method='rpart2', trControl=fitControl,tuneLength=10)
+model_CART<-train(new_cases ~ . ,data=v3data.train, method='rpart2', trControl=fitControl,tuneLength=10)
 print(model_CART)
 plot(model_CART)
 rfImp_CART <- varImp(model_CART) 
 plot(rfImp_CART, top = 53)
+saveRDS(model_rf, "CART_model.rds")
+
+
 
 # M5 Model tree
 set.seed(1234)
-model_M5<-train(Output ~ . ,data=v3data.train, method='M5', trControl=fitControl,tuneLength=10)
+model_M5<-train(new_cases ~ . ,data=v3data.train, method='M5', trControl=fitControl,tuneLength=10)
 print(model_M5)
 plot(model_M5)
 rfImp_M5 <- varImp(model_M5) 
 plot(rfImp_M5, top = 53)
+saveRDS(model_rf, "M5_model.rds")
+
+
 
 # Neural Network
 set.seed(1234)
-model_NN<-train(Output ~ .,data=v3data.train, method='neuralnet', trControl=fitControl,tuneLength=10)
+model_NN<-train(new_cases ~ .,data=v3data.train, method='neuralnet', trControl=fitControl,tuneLength=10)
 print(model_NN)
 plot(model_NN)
 rfImp_NN <- varImp(model_NN) 
@@ -46,7 +66,7 @@ plot(rfImp_NN, top = 53)
 
 # Random Forest
 set.seed(1234)
-model_rf<-train(Output ~ . ,data=v3data.train, method='rf', trControl=fitControl,tuneLength=10, importance = T)
+model_rf<-train(new_cases ~ . ,data=v3data.train, method='rf', trControl=fitControl,tuneLength=10, importance = T)
 print(model_rf)
 plot(model_rf)
 rfImp_rf <- varImp(model_rf) 
@@ -55,15 +75,19 @@ plot(rfImp_rf, top = 53)
 
 # Gradient Boosted Tree model
 set.seed(1234)
-model_gbm<-train(Output ~ . ,data=v3data.train, method='gbm', trControl=fitControl,tuneLength=10, importance = T)
+model_gbm<-train(new_cases ~ . ,data=v3data.train, method='gbm', trControl=fitControl,tuneLength=10, importance = T)
 print(model_gbm)
 plot(model_gbm)
 rfImp_gbm <- varImp(model_gbm) 
 plot(rfImp_gbm, top = 53)
+saveRDS(model_rf, "GBT_model.rds")
+
 
 ### Stacking model
 # collect resamples
-results <- resamples(list(CART=model_CART, RF=model_rf, GBM=model_gbm, M5=model_M5, LR=model_LR, NeuraNet = model_NN))
+results <- resamples(list(CART=model_CART, 
+                      RF=model_rf, 
+                      LR=model_LR))
 
 
 # summarize differences between modes
@@ -93,9 +117,14 @@ plot(varImp(object=model_CART),top = 11,main="CART (Boruta) - Variable Importanc
 
 ### Predictions in test data (If model_RF has highest accuracy)
 
-v3data.train$Predicted_Output <-predict.train(object=model_RF,v3data.train)
+v3data.train$Predicted_new_cases <-predict.train(object=model_rf,v3data.train)
 
-v3data.test$Predicted_Output <-predict.train(object=model_RF,v3data.test)
+v3data.test$Predicted_new_cases <-predict.train(object=model_rf,v3data.test)
+
+
+### Save Trained Model
+saveRDS(model_rf, "model.rds")
+model_rf <- readRDS("full_var_model.rds")
 
 ### Error measurement
 
@@ -103,16 +132,16 @@ library("Metrics")
 
 # Training error
 
-mse(v3data.train$Predicted_Output , v3data.train$Output)
-rmse(v3data.train$Predicted_Output , v3data.train$Output)
-postResample(pred= v3data.train$Predicted_Output ,obs =v3data.train$Output)
-cor(v3data.train$Predicted_Output , v3data.train$Output)	
+mse(v3data.train$Predicted_new_cases , v3data.train$new_cases)
+rmse(v3data.train$Predicted_new_cases , v3data.train$new_cases)
+postResample(pred= v3data.train$Predicted_new_cases ,obs =v3data.train$new_cases)
+cor(v3data.train$Predicted_new_cases , v3data.train$new_cases)	
 
 # Testing error
-mse(v3data.test$Predicted_Output , v3data.test$Output)
-rmse(v3data.test$Predicted_Output , v3data.test$Output)
-postResample(pred= v3data.test$Predicted_Output ,obs =v3data.test$Output)
-cor(v3data.test$Predicted_Output , v3data.test$Output)	
+mse(v3data.test$Predicted_new_cases , v3data.test$new_cases)
+rmse(v3data.test$Predicted_new_cases , v3data.test$new_cases)
+postResample(pred= v3data.test$Predicted_new_cases ,obs =v3data.test$new_cases)
+cor(v3data.test$Predicted_new_cases , v3data.test$new_cases)	
 
 
 # Export data
@@ -123,15 +152,23 @@ write.csv(v3data.test, "......csv", row.names = FALSE)
 
 
 ----------------------------------------------------------
-  
+## Parallel Training
+library(doParallel)
+cluster <- makeCluster(detectCores(logical = TRUE)) # leave one CPU spare...
+registerDoParallel(cluster)
+clusterEvalQ(cluster, {
   library(pdp)
+})
+
+  
+library(pdp)
 ## Compute pdp for single variable 
-pd_1st_order <- partial(model_rf, pred.var = c("C1_3_days"), rug = TRUE, plot = TRUE)
+pd_1st_order <- partial(model_rf, pred.var = c("c7_2_action"), rug = TRUE, plot = TRUE)
 
 pd_1st_order
 
 ## Compute contour pdp for 2 variables 
-pd <- partial(model_rf, pred.var = c("C3_0_days", "C3_2_days"), chull = FALSE, contour = TRUE)
+pd <- partial(model_rf, pred.var = c("c7_1_action", "c7_2_action"), chull = FALSE, contour = TRUE)
 # Add contour lines and use a different color palette
 rwb <- colorRampPalette(c("blue", "white", "red" ))
 pdp_2nd_order <- plotPartial(pd, contour = TRUE, col.regions = rwb)
