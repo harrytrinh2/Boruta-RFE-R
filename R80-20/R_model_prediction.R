@@ -151,6 +151,53 @@ write.csv(v3data.train, ".....csv", row.names = FALSE)
 write.csv(v3data.test, "......csv", row.names = FALSE)
 
 
+# H-staistic
+library(dplyr)     # basic data transformation
+library(iml)       # ML interprtation
+library(h2o)       # machine learning modeling
+library(stats)
+
+# 1. create a data frame with just the features
+features <- as.data.frame(v3data.train) %>% select(-new_cases)
+
+# 2. Create a vector with the actual responses
+response <- as.numeric(as.vector(v3data.train$new_cases))
+
+
+# initialize h2o session
+h2o.no_progress()
+h2o.init()
+
+## Parallel Training
+library(doParallel)
+cluster <- makeCluster(detectCores(logical = TRUE)) # leave one CPU spare...
+registerDoParallel(cluster)
+clusterEvalQ(cluster, {
+  library(iml)
+})
+# 3. Create custom predict function that returns the predicted values as a
+#    vector (probability of purchasing in our example)
+pred <- function(model, newdata)  {
+  results <- as.data.frame(h2o.predict(model, as.h2o(newdata)))
+  return(results[[3L]])
+}
+
+# example of prediction output
+pred(my_model, features) %>% head()
+
+predictor.rf <- Predictor$new(
+  model = my_model, 
+  data = features, 
+  y = response, 
+  predict.fun = pred,
+  class = "classification"
+)
+
+interact.rf  <- Interaction$new(predictor.rf) %>% plot() + ggtitle("RF")
+
+
+
+
 ----------------------------------------------------------
 ## Parallel Training
 library(doParallel)
@@ -164,8 +211,12 @@ clusterEvalQ(cluster, {
 library(pdp)
 ## Compute pdp for single variable 
 pd_1st_order <- partial(model_rf, pred.var = c("c7_2_action"), rug = TRUE, plot = TRUE)
-
 pd_1st_order
+
+## Save plot
+pdf("pd_1st_order.pdf") 
+pd_1st_order
+dev.off()
 
 ## Compute contour pdp for 2 variables 
 pd <- partial(model_rf, pred.var = c("c7_1_action", "c7_2_action"), chull = FALSE, contour = TRUE)
@@ -175,6 +226,10 @@ pdp_2nd_order <- plotPartial(pd, contour = TRUE, col.regions = rwb)
 
 pdp_2nd_order
 
+## Save plot
+pdf("pdp_2nd_order.pdf") 
+pdp_2nd_order
+dev.off()
 
 
 
