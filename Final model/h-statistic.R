@@ -1,4 +1,4 @@
-setwd("~/Boruta-RFE-R-main/Final model")
+setwd("~/Documents/GlobalCovid19/RFE-Boruta-R/Final model")
 
 # Load data 
 v3data.train <- read.csv("full_train_setcsv.csv")
