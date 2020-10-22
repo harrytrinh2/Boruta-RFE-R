@@ -46,6 +46,7 @@ saveRDS(model_rf, "CART_model.rds")
 
 
 # M5 Model tree
+library("RWeka")
 set.seed(1234)
 model_M5<-train(new_cases ~ . ,data=v3data.train, method='M5', trControl=fitControl,tuneLength=10)
 print(model_M5)
