@@ -54,7 +54,7 @@ plot(model_M5)
 rfImp_M5 <- varImp(model_M5) 
 plot(rfImp_M5, top = 53)
 saveRDS(model_rf, "M5_model.rds")
-
+model_M5  <- readRDS("full_var_model.rds")
 
 
 # Neural Network
@@ -118,9 +118,9 @@ plot(varImp(object=model_CART),top = 11,main="CART (Boruta) - Variable Importanc
 names(v3data.test)
 ### Predictions in test data (If model_RF has highest accuracy)
 
-v3data.train$Predicted_new_cases <-predict.train(object=model_rf,v3data.train)
+v3data.train$Predicted_new_cases <-predict.train(object=model_M5,v3data.train)
 
-v3data.test$Predicted_new_cases <-predict.train(object=model_rf,v3data.test)
+v3data.test$Predicted_new_cases <-predict.train(object=model_M5,v3data.test)
 
 
 ### Save Trained Model
